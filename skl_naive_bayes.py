@@ -9,7 +9,7 @@ if __name__=='__main__':
         data=np.array([[float(f) for f in  line.strip().split(',')] for line in dfile.readlines()])
     nb = GaussianNB()
     #nb = MultinomialNB()
-    ## 前300行训练模型
+    ## 前500行训练模型
     nb.fit(data[:500,:-1],data[:500,-1])
     
     ##剩余数据测试模型
