@@ -2,6 +2,11 @@
 #-*- coding:utf-8 -*-
 import numpy as np
 import sys
+###############################
+#  朴素贝叶斯实现
+#  @author migle 2017-3-31
+#
+###############################
 class NaiveBayes:
     def __init__(self):
         pass
