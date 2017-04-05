@@ -1,4 +1,3 @@
-# 朴素贝叶斯算法 
 ## 算法描述  
 朴素贝叶斯算法是监督学习中分类算法中的一种。需要先通过学习一批分类**正确**的训练数据集得出模型才能进行分类,算法大致如下：
 
@@ -60,9 +59,10 @@ f(x) = Max(P(Y1|F1..Fn),...,P(Y2|F1..Fn))
 
 对于连续值的问题有以下两种方式处理：
 1. 将连续值进行离散化处理。
-2. 用概率密度函数（高斯分布)
+2. 用概率密度函数（高斯分布)，也就是说认为特征值呈正态分布。
 
 ![image](_image/gaussian.jpg)
+
 
 用概率密度函数来计算每一种分类的概率大小，取最大值。
 
@@ -70,7 +70,7 @@ f(x) = Max(P(Y1|F1..Fn),...,P(Y2|F1..Fn))
 Y=P(F1)*P(F2)..P(Fn)
 ```
 两边取对数，转换成加法，比如scikit-learn中*naive_bayes.py/GaussianNB*中就是这样实现的
->>但在方差后面为什么加`1e-9` ?
+>>在方差后面加`1e-9`避免除0 ?
 
 
 ### 代码实现
@@ -119,5 +119,6 @@ iris.target
 
 ## 参考资料
 1. [算法杂货铺——分类算法之朴素贝叶斯分类(Naive Bayesian classification)](http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html)
+2. [NLP系列(4)_朴素贝叶斯实战与进阶](http://blog.csdn.net/han_xiaoyang/article/details/50629608)
 2. [scikit-learn学习 - 朴素贝叶斯](http://www.cnblogs.com/zhaoxy/p/5075466.html)
 3. 百度百科：概率基础知识 :(  
