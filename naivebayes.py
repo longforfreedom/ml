@@ -54,27 +54,23 @@ class NaiveBayes:
         for i,c_i in enumerate(self.classes):
             x_i = x[y==c_i,:] 
             #计算P(Y)
-            self.y_p[i] = np.float(x_i.shape[0]) / self.n_samples 
+            self.y_p[i] = np.float(x_i.shape[0]) / self.n_samples
+            #P(X|Y) 
             self.y_x_p[c_i] = []
             for j in range(self.n_features):
-                    self.y_x_p[c_i].append(self.__f_p(x_i[:,j]))
-
-            print self.y_x_p
+                self.y_x_p[c_i].append(self.__f_p(x_i[:,j]))
     def predict(self,x):
         rs =  np.zeros(x.shape[0])
         for j in range(x.shape[0]):
             r = np.zeros(self.classes.size)
             for i,c_i in enumerate(self.classes):
-                r[i] = self.y_p[i]
+                r[i] = np.log(self.y_p[i])
                 for f in range(self.n_features):
-                    r[i] = r[i] * self.y_x_p[c_i][f][x[j,f]]  #if x[j,f] in self.y_x_p[c_i][f][x[j,f]]  else r[i]  #避免为0整体为0 
-            print r
-            print r.argmax()
-            print self.classes
+                    r[i] = r[i] + np.log(self.y_x_p[c_i][f][x[j,f]]) if x[j,f] in self.y_x_p[c_i][f]  else r[i]  #避免为0整体为0 
             rs[j] = self.classes[r.argmax()]
         return rs
 
-    #计算P(X|Y)
+    #计算P(Xi|Y)
     def __f_p(self,featuer):
         size = len(featuer)
         d={}
@@ -86,38 +82,37 @@ class NaiveBayes:
             
         
 if __name__=='__main__':
+
+    print '--------------NaiveBayes-------------'
     data=[]
-    #with  open('pima-indians-diabetes.data') as dfile:
-    #    data=np.array([[float(f) for f in  line.strip().split(',')] for line in dfile.readlines()])
-#
-    #print 'load data rows:%d cloumns:%d' % data.shape 
-#
-    #nbayes = GaussianNB()
-    #nbayes.train(data[:500,:-1],data[:500,-1])
-#
-    ##nbayes.predict(np.array([float(f) for f in  sys.argv[1].strip().split(',')]))
-    #p_r = nbayes.predict(data[500:,:-1])
-    #r_r = data[500:,-1]
-    ##print p_r == r_r
-    #right_num = np.count_nonzero(p_r == r_r)
-    #print '共预测样本:%d' %   p_r.shape[0]
-    #print '预测正确率:%f' %  (right_num*1.0/p_r.shape[0])
+    with  open('pima-indians-diabetes.data') as dfile:
+        data=np.array([[float(f) for f in  line.strip().split(',')] for line in dfile.readlines()])
+    print 'load data rows:%d cloumns:%d' % data.shape 
+    nbayes = GaussianNB()
+    nbayes.train(data[:500,:-1],data[:500,-1])
+    #nbayes.predict(np.array([float(f) for f in  sys.argv[1].strip().split(',')]))
+    p_r = nbayes.predict(data[500:,:-1])
+    r_r = data[500:,-1]
+    #print p_r == r_r
+    right_num = np.count_nonzero(p_r == r_r)
+    print '共预测样本:%d' %   p_r.shape[0]
+    print '预测正确率:%f' %  (right_num*1.0/p_r.shape[0])
 
-    #print data[500:501,-1]
+    print '--------------NaiveBayes-------iris------'
+    from sklearn import datasets
+    iris = datasets.load_iris()
+    
+    nbayes.train(iris.data[:130],iris.target[:130])
+    #print  nbayes.predict(iris.data[130:])
+    iris_r = nbayes.predict(iris.data[130:]) == iris.target[130:]
+    right_num = np.count_nonzero(iris_r)
+    #print iris_r
+    print '共预测样本:%d' %   iris.data[130:].shape[0]
+    print '预测正确率:%f' %  (right_num*1.0/iris.data[130:].shape[0])
 
-    #x=[v[0:-2] for v in data]
-    #y=[[v[-1]]   for v in data]
-    #print x[:10]
-    #print y[:10]
-
-    X = np.random.randint(2, size=(6, 10))
-    Y = np.array([1, 3, 3, 4, 4, 3])
-
-    from sklearn.naive_bayes import BernoulliNB
-    clf = BernoulliNB()
-    clf.fit(X, Y)
-    print(clf.predict(X[2:3]))
-
+    print '--------------NaiveBayes-------------'
+    X = np.random.randint(2, size=(6, 100))
+    Y = np.array([1, 2, 3, 4, 4, 2])
     nb = NaiveBayes()
     nb.train(X, Y)
-    print(nb.predict(X[2:3]))
+    print('mnb:%s' % nb.predict(X[2:3]))
