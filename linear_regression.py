@@ -69,6 +69,6 @@ if __name__ =='__main__':
     plt.plot(X_n[:30],Y,'ro')
     plt.plot(X_n[:30],lr.predict(X_n[:30]))
     
-    print detail
+    print(detail)
 
 
