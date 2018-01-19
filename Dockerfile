@@ -1,14 +1,22 @@
 FROM alpine
 MAINTAINER migle <longforfreedom@gmail.com>
+RUN echo "https://mirrors.aliyun.com/alpine/v3.7/main/" >> /etc/apk/repositories
+RUN echo "https://mirrors.aliyun.com/alpine/v3.7/community/" >> /etc/apk/repositories
 
 #ENV JAVA_HOME /usr/java/default
+RUN apk add --no-cache bash  gcc gfortran  build-base 
 RUN apk add --no-cache python3 openssl-dev python3-dev
-RUN apk add --no-cache py-pip
-RUN python -m pip install numpy
 
-RUN  rm -rf /var/cache/apk/* 
-RUN  rm -rf ~/.cache/ 
+RUN pip3 install numpy -i http://mirrors.aliyun.com/pypi/simple/  --trusted-host mirrors.aliyun.com    #使用国内镜像
+#pip install numpy 
+#pip install scipy
+#scipy pandas matplotlib
+#RUN  rm -rf /var/cache/apk/* 
+#RUN  rm -rf ~/.cache/ 
 
+
+
+##py3-pillow 
 #WORKDIR /opt
 
 #download from spark website
