@@ -25,12 +25,17 @@ print(count_vect.vocabulary_.get('algorithm'))
 print(count_vect.vocabulary_.get('mail'))
 print('-'*20)
 
+import sklearn.feature_extraction.DictVectorizer
 tfidf_transformer = TfidfTransformer()
 X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
 
 #print(X_train_tfidf.shape)
-print(X_train_counts[1])
-#print('-'*20)
-#print(X_train_tfidf[1])
+#print(X_train_counts[1])
+print(X_train_counts.shape)
+print('-'*20)
+print(X_train_tfidf[0])
+print('-'*20)
+print(X_train_tfidf.shape)
+
 #print(dir(count_vect))
 #clf = MultinomialNB().fit(X_train_tfidf, twenty_train.target)

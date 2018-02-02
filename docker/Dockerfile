@@ -36,6 +36,12 @@ RUN pip3 install --no-cache-dir -U scikit-learn -i http://mirrors.aliyun.com/pyp
 RUN pip3 install http://download.pytorch.org/whl/cpu/torch-0.3.0.post4-cp36-cp36m-linux_x86_64.whl 
 RUN pip3 install torchvision  -i http://mirrors.aliyun.com/pypi/simple/  --trusted-host mirrors.aliyun.com
 
+
+## for NLP
+#RUN pip3 install nltk    -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+#RUN pip3 install jieba    -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+#RUN pip3 install gensim    -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+
 #clean
 RUN apt-get -y autoremove
 RUN apt-get -y clean
