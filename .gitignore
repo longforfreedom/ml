@@ -2,3 +2,6 @@
 *~
 data/captcha/data/*
 data/mnist/*
+data/captcha/test/*.jpg
+data/captcha/train/*.jpg
+*.pyc
