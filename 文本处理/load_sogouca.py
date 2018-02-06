@@ -1,0 +1,106 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+import os
+from os.path import join as path_join
+from os.path import exists as path_exists
+import logging
+from zipfile import ZipFile
+from collections import namedtuple 
+from collections import Counter  
+import jieba
+"""加载数据，分词，TD-IDF,word2vec"""
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(
+                level=logging.INFO,
+                format='%(asctime)s [line:%(lineno)d] %(levelname)s %(threadName)s: %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S')
+
+RemoteFileMetadata = namedtuple('RemoteFileMetadata',
+                                ['filename', 'url', 'checksum'])
+
+sogouca_sample_metadata = RemoteFileMetadata(
+    filename='news_tensite_xml.smarty.zip',
+    url='http://download.labs.sogou.com/dl/sogoulabdown/SogouCA/news_tensite_xml.smarty.zip',
+    checksum='')
+
+sogouca_full_metadata = RemoteFileMetadata(
+    filename='news_tensite_xml.full.zip',
+    url='http://www.sogou.com/labs/resource/ftp.php?dir=/Data/SogouCA/news_tensite_xml.full.zip',
+    checksum='')
+
+def toutf8(line):
+    """编码转成utf-8"""
+    return line.decode('gbk', 'ignore').encode('utf-8').decode('utf-8', 'ignore')
+
+def del_tag(line, tag_name):
+    """删除xml标记"""
+    start = 2 + len(tag_name)
+    end = -3 - len(tag_name)
+    return line[start:end]
+
+def download_file(remote,filepath):
+    """下载数据文件"""
+    from  urllib import request
+    request.urlretrieve(remote.url,filepath)
+    #sogou没有提供checksum!就不做校验了
+    return filepath
+
+def load_sogouca(data_home,is_sample = True, download_if_missing=True):
+    """[全网新闻数据(SogouCA)](http://www.sogou.com/labs/resource/ca.php),不是标准的XML格式，特殊字符没有转义 """
+    metadata = sogouca_sample_metadata if is_sample else sogouca_full_metadata
+
+    if not path_exists(data_home):
+        os.makedirs(data_home)
+
+    file_path = path_join(data_home,metadata.filename)
+    if not path_exists(file_path):
+        if download_if_missing:
+            logger.info('download sougouca...')
+            download_file(metadata,file_path)                            
+        else:
+            raise IOError('sogouca data not found!')
+        
+
+    def format_line(line, tag):
+        """简便封装"""
+        return del_tag(toutf8(line.strip()), tag)
+    # if not download_if_missing:
+    #        raise IOError('Data not found and `download_if_missing` is False')
+    #        logger.info('Downloading species data from %s to %s' % (SAMPLES.url, data_home))
+    with ZipFile(file_path) as zip_xml:
+        logger.debug('read data from zip file %s ',file_path)
+        for xml in zip_xml.namelist():
+            with zip_xml.open(xml) as xml:
+                for lines in xml:
+                    if lines.strip() == b'<doc>':
+                        logger.debug('start')
+                        url = format_line(xml.readline(), 'url')
+                        docno = format_line(xml.readline(), 'docno')
+                        contenttitle = format_line(
+                            xml.readline(), 'contenttitle')
+                        content = format_line(xml.readline(), 'content')
+                        if xml.readline().strip() == b'</doc>':
+                            logger.debug('end:%s',docno)
+                        yield (docno, url, contenttitle, content)
+
+
+if __name__ == '__main__':
+    wp_path = path_join(os.path.dirname(__file__),'data-test')
+    #file = open(path_join(wp_path,'x.txt'), 'w', encoding='utf-8')
+    words_count={}
+    for i in load_sogouca(data_home=wp_path):
+        #file.write('{0}\n'.format(i[3]))
+        seg_list = jieba.lcut(i[3])
+        for seg in  seg_list:
+            if seg not in words_count:
+                if seg in ['，','。','、']:
+                    continue
+                words_count[seg] = 1
+                #print(seg)
+            else:
+                words_count[seg] = words_count[seg] + 1
+
+    c = Counter(words_count)
+    for k in c.most_common(100):
+        print('{0}:{1}'.format(*k))
