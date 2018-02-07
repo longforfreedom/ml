@@ -8,6 +8,7 @@ from zipfile import ZipFile
 from collections import namedtuple 
 from collections import Counter  
 import jieba
+import jieba.analyse
 """加载数据，分词，TD-IDF,word2vec"""
 logger = logging.getLogger(__name__)
 
@@ -24,10 +25,21 @@ sogouca_sample_metadata = RemoteFileMetadata(
     url='http://download.labs.sogou.com/dl/sogoulabdown/SogouCA/news_tensite_xml.smarty.zip',
     checksum='')
 
+#全量数据需要验证 
+# wget http://www.sogou.com/labs/sogoudownload/SogouCS/news_sohusite_xml.full.zip --http-user=longforfreedom@sogou.com --http-passwd=oNML0!kRwhpz5y89
 sogouca_full_metadata = RemoteFileMetadata(
     filename='news_tensite_xml.full.zip',
     url='http://www.sogou.com/labs/resource/ftp.php?dir=/Data/SogouCA/news_tensite_xml.full.zip',
     checksum='')
+#sogoucs_sample_metadata = RemoteFileMetadata(
+#    filename='news_sohusite_xml.smarty.zip',
+#    url='http://download.labs.sogou.com/dl/sogoulabdown/SogouCS/news_sohusite_xml.smarty.zip',
+#    checksum='')
+
+#sogoucs_full_metadata = RemoteFileMetadata(
+#    filename='news_tensite_xml.full.zip',
+#    url='http://www.sogou.com/labs/resource/ftp.php?dir=/Data/SogouCA/news_tensite_xml.full.zip',
+#    checksum='')
 
 def toutf8(line):
     """编码转成utf-8"""
@@ -87,20 +99,30 @@ def load_sogouca(data_home,is_sample = True, download_if_missing=True):
 
 if __name__ == '__main__':
     wp_path = path_join(os.path.dirname(__file__),'data-test')
-    #file = open(path_join(wp_path,'x.txt'), 'w', encoding='utf-8')
+    file = open(path_join(wp_path,'x.txt'), 'w', encoding='utf-8')
     words_count={}
     for i in load_sogouca(data_home=wp_path):
-        #file.write('{0}\n'.format(i[3]))
+        file.write('{}\n'.format(i[1]))
+        #抽取关键字
+        #tag1 = jieba.analyse.extract_tags(i[3],topK=10)
+        #tag2 = jieba.analyse.textrank(i[3],topK=10)
+        #print("{} : {}".format(i[2],",".join(tag1)))
+        #print("{} : {}".format(i[2],",".join(tag2)))
+        #print("-"*20)
+        #分词
         seg_list = jieba.lcut(i[3])
         for seg in  seg_list:
             if seg not in words_count:
-                if seg in ['，','。','、']:
+                #if seg in '，。、“ .）\（；＃！》《\,': #['，','。','、','“',' ','.','）','\,','（','；','＃','！','》','《']:
+                #    continue
+                if not seg.isalnum():
                     continue
                 words_count[seg] = 1
                 #print(seg)
             else:
                 words_count[seg] = words_count[seg] + 1
 
+    print(len(words_count))
     c = Counter(words_count)
     for k in c.most_common(100):
         print('{0}:{1}'.format(*k))
